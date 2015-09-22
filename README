@@ -1,0 +1,19 @@
+client 실행 방법
+./client <host> <port> <window_size> <delay>
+예시 : ./client cn.snucse.org 9999 2 10
+window_size는 1, 2, 4, 8 중에 하나
+delay는 msec 단위이고, 1, 10, 100 중에 하나
+
+client 실행하고 Enter command 가 출력되면 C, R <n>, F 중 하나를 입력할 수 있음
+C : connect to server. 이미 연결 된 상태라면 에러메세지 출력, 서버가 listening 중이 아니라면 에러메세지 출력 후 종료
+R <n> : n 번째 파일 전송 요청. 전송 중엔 입력 받을 수 없음. n = 1, 2, 3
+F : finish the connection. 서버도 종료 시킴
+
+server 실행 방법
+./server <port>
+예시 : ./server 9999
+
+server는 실행 후 입력을 따로 받지 않음
+
+전송 진행 상황은 작업 편의상 서버와 클라이언트 둘 다에 출력됨.
+전송 결과는 클라이언트에만 출력됨.
