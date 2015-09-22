@@ -1,6 +1,6 @@
-CC = gcc
+CC = gcc 
 INC = -I.
-FLAGS = -W -Wall -g
+FLAGS = -W -Wall -g 
 TARGETS = server client
 
 all: $(TARGETS)
