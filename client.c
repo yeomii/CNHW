@@ -144,8 +144,8 @@ int main (int argc, char **argv) {
           }
           elapsed_time = get_time() - elapsed_time;
           double throughput = ((double)total_size / 1024) / ((double)elapsed_time / 1000);
-          printf("%d MB (%d bits) transmission finished\n", curr_progress, total_size);
-          printf("Elapsed time is %d msec and throughput is %f Kbps.\n", 
+          printf("%d MB (%d bytes) transmission finished\n", curr_progress, total_size);
+          printf("Elapsed time is %d msec and throughput is %f KBps.\n", 
             (int)elapsed_time, throughput);
           break;
         }
