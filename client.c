@@ -14,6 +14,9 @@
 #include <errno.h>
 #include "packet.h"
 
+#define NTIMERS 32
+#define DEBUG {printf("%d ", __LINE__); fflush(stdout);}
+
 int sockfd = -1;
 int acks = 0;
 
@@ -83,6 +86,8 @@ int main (int argc, char **argv) {
   while(1)
   {
     printf("Enter command\n");
+    bzero(command, sizeof(command));
+    fflush(stdin);
     fgets(command, sizeof(command), stdin);
     switch (tolower(command[0]))
     {
@@ -98,6 +103,7 @@ int main (int argc, char **argv) {
       case 'r':
         {
           int file_n = atoi(&(command[1]));
+          int recv_n = 0;
           if (file_n < 1 || file_n > 3)
           {
             printf("file number must be 1, 2 or 3\n");
@@ -114,17 +120,20 @@ int main (int argc, char **argv) {
             error("Error : writing socket");
           int recv_size, total_size = 0, prev_progress, curr_progress;
           packet recv_packet;
-          bzero((char *) &recv_packet, sizeof(recv_packet));
           while (1)
           {
+            bzero((char *) &recv_packet, sizeof(recv_packet));
             recv_size = read(sockfd, (char *) &recv_packet, sizeof(recv_packet));
             if (recv_size < 0)
             {
               if (errno == EINTR) continue;
               else error("Error : reading socket");
             }
-            if (recv_packet.packet_n < 0)
+
+            if (recv_packet.packet_n == -1)
               break;
+
+            recv_n++;
             recv_size -= 4;
             set_timer(delay);
             prev_progress = total_size / 1048576 ;
@@ -177,6 +186,7 @@ int main (int argc, char **argv) {
  */
 void handler(int signo) {
   ACK req_packet;
+  bzero((char *) &req_packet, sizeof(req_packet));
   while (1)
   {
     int n = write(sockfd, (char *)&req_packet, sizeof(req_packet));
@@ -196,13 +206,13 @@ void handler(int signo) {
  */
 
 timer_t set_timer(long long msec) {
-  static timer_t timers[16];
+  static timer_t timers[NTIMERS];
   static int initialized = 0;
   static int timer_index = 0;
 
   if (!initialized) 
   {
-    for (timer_index = 0; timer_index < 16; timer_index++)
+    for (timer_index = 0; timer_index < NTIMERS; timer_index++)
       if (timer_create(CLOCK_MONOTONIC, NULL, timers + timer_index))
         perror("timer_create");
     initialized = 1;
@@ -221,7 +231,7 @@ timer_t set_timer(long long msec) {
   if (timer_settime(timers[timer_index], 0, &time_spec, NULL))
     perror("timer_settime");
   else 
-    timer_index = (timer_index + 1) % 16;
+    timer_index = (timer_index + 1) % NTIMERS;
 
   return timers[idx];
 }
