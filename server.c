@@ -85,14 +85,24 @@ int main (int argc, char **argv) {
     // accept client 
     if (!is_readable(client_sockfd)) continue;
 
-    res = read(client_sockfd, (char *)&ack_packet, sizeof(ack_packet));
-    if (res < 0)
-      error("Error : reading socket");    
-    file_n = ack_packet.file_n;
-    window_size = ack_packet.window_size;
-    if (file_n < 0)
+    while (1)
+    {
+      res = read(client_sockfd, (char *)&ack_packet, sizeof(ack_packet));
+      if (res < 0)
+        error("Error : reading socket");    
+      file_n = ack_packet.file_n;
+      window_size = ack_packet.window_size;
+      if (file_n > 0)
+      {
+        printf("file number : %d, window size : %d\n", file_n, window_size);
+        break;
+      } else if (file_n == -1)
+        break;
+    }
+
+    if (file_n == -1)
       break;
-    
+
     // open file to transfer
     char file_name[64];
     sprintf(file_name, "data/TransferMe%d0.mp4", file_n);
@@ -119,6 +129,7 @@ int main (int argc, char **argv) {
         
         if (sendN <= max_sendN)
         {
+          bzero((char *) &serv_packet, sizeof(serv_packet));
           serv_packet.packet_n = sendN;
           res = write(client_sockfd, (char *) &serv_packet, sizeof(serv_packet));
           if (res < 0)
